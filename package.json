@@ -1,0 +1,16 @@
+{
+    "name": "seatassign",
+    "version": "1.0.2",
+    "main": "index.js",
+    "description": "提供了vue座位分布的功能，可根据桌形自动或手动生成排座",
+    "keywords": [
+      "排座",
+      "座位",
+      "拖拽"
+    ],
+    "dependencies":{
+      "html2canvas": "^1.4.1"
+    },
+    "license": "ISC"
+  }
+  
