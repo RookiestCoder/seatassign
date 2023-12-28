@@ -28,9 +28,8 @@ const props = {
                 assignType:'normal',    //选座模式1.free自由拖拽，2.exchange座位互换，3.slide滑动互换
             }
         }
-
     },
-
 }
 
 export default props
+

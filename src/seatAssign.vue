@@ -1,9 +1,7 @@
 <template>
   <div class="com-seatAssign">
     <div class="table-box">
-      <!-- 按钮 -->
       <div v-show="showBtns" class="tableBtns">
-        <!-- 重置座位分布 -->
         <div
           v-if="roundConfig.btnVisiable.indexOf('reset') > -1"
           @click="resetRoundTableSeat"
@@ -11,7 +9,6 @@
         >
           重置座位
         </div>
-        <!-- 记录座位信息 -->
         <div
           v-if="roundConfig.btnVisiable.indexOf('staging') > -1"
           @click="saveCurrentPosition"
@@ -19,7 +16,6 @@
         >
           暂存分布
         </div>
-        <!-- 恢复上次暂存 -->
         <div
           v-if="roundConfig.btnVisiable.indexOf('staging') > -1"
           @click="recoveryPosition"
@@ -27,7 +23,6 @@
         >
           恢复暂存
         </div>
-        <!-- 保存到本地 -->
         <div
           v-if="roundConfig.btnVisiable.indexOf('saveImg') > -1"
           @click="savetolocal"
@@ -37,27 +32,21 @@
         </div>
       </div>
 
-      <!-- 圆桌 -->
       <div class="table">
-        <!-- 圆桌插槽 -->
         <div v-if="$scopedSlots.table" class="tableSlot">
           <slot name="table"></slot>
         </div>
-        <!-- 默认圆桌 -->
         <div v-else class="roundTable"></div>
       </div>
 
-      <!-- 座位 -->
       <div
         v-for="(item, index) in roundConfig.PersonList"
         :key="index"
         class="singleSeat"
       >
-        <!-- 座位自定义插槽 -->
         <template v-if="$scopedSlots.seat">
           <slot name="seat" :seatInfo="item" :index="index"></slot>
         </template>
-        <!-- 座位默认信息 -->
         <div v-else class="singleSeat-default">
           {{ item.name }}
         </div>
@@ -66,26 +55,40 @@
   </div>
 </template>
     <script>
-import html2canvas from "html2canvas"; //分享海报
+import html2canvas from "html2canvas";
 import props from "./prop";
 export default {
   name: "seatAssign",
   props,
   data() {
     return {
-      showBtns: true, //是否展示按钮，在保存图片的时候隐藏一下
-      squareBoxWidth: 600, //方框宽
-      squareBoxHeight: 600, //方框高
+      showBtns: true,
+      squareBoxWidth: 600,
+      squareBoxHeight: 600,
       tableBackGround: "rgba(164, 228, 188, 0.2)",
 
-      chosenSeat: 0, //用户点击的座位下标
-      willBenChangeSeat: 0, //将要被换的座位下标
+      chosenSeat: 0,
+      willBenChangeSeat: 0,
 
-      historyPosition: [], //保存历史位置分布(暂存分布)
+      historyPosition: [],
     };
   },
   methods: {
-    //保存到本地
+    getCurrentPos() {
+      let currentPos = [];
+      let seatList = document.getElementsByClassName("singleSeat");
+      for (let i = 0; i < seatList.length; i++) {
+        currentPos.push({
+          x: seatList[i].style.left,
+          y: seatList[i].style.top,
+          name: seatList[i].innerText,
+        });
+      }
+      return currentPos;
+    },
+    getStagingPos() {
+      return this.historyPosition;
+    },
     savetolocal() {
       this.showBtns = false;
       console.log("aaaa", (this.showBtns = false));
@@ -93,23 +96,29 @@ export default {
         var targetDom = document.querySelector(".table-box");
         const scrolly = targetDom.scrollTop;
         html2canvas(targetDom, {
-          useCORS: true, // 开启跨域配置，如果图片里面有图片，需要加入该项
-          height: targetDom.scrollHeight, //canvas高
-          width: targetDom.scrollWidth, //canvas宽
-          scrollY: scrolly, //渲染元素时的Y轴滚动
+          useCORS: true,
+          height: targetDom.scrollHeight,
+          width: targetDom.scrollWidth,
+          scrollY: scrolly,
           windowHeight: 3000,
         }).then((canvas) => {
           let url = canvas.toDataURL("image/jpeg", 1.0);
-          // console.log('打印url',url)
+          if (false) {
+            this.saveImg({
+              url: url,
+            });
+            this.$parent.shareposter = false;
+          } else {
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = `${new Date().getTime()}.png`;
+            a.click();
+            this.$message.success("保存成功");
+          }
         });
         this.showBtns = true;
       });
     },
-    /**
-     * @description ： 暂时保存座位位置，点击恢复时恢复
-     * @param {*}
-     * @return {*}
-     */
     saveCurrentPosition() {
       this.historyPosition = [];
       let seatList = document.getElementsByClassName("singleSeat");
@@ -119,15 +128,8 @@ export default {
           y: seatList[i].style.top,
         });
       }
-      console.log("historyPosition", this.historyPosition);
       this.$message.success("暂存成功");
-      // this.historyPosition
     },
-    /**
-     * @description ：恢复暂存的位置
-     * @param {*}
-     * @return {*}
-     */
     recoveryPosition() {
       let seatList = document.getElementsByClassName("singleSeat");
       for (let i = 0; i < seatList.length; i++) {
@@ -135,10 +137,15 @@ export default {
         seatList[i].style.top = this.historyPosition[i].y;
       }
     },
-    //初始化或重置座位
+    resetInterPos() {
+      let seatList = document.getElementsByClassName("singleSeat");
+      for (let i = 0; i < seatList.length; i++) {
+        seatList[i].style.left = this.roundConfig.PersonList[i].initialX;
+        seatList[i].style.top = this.roundConfig.PersonList[i].initialY;
+      }
+    },
     resetRoundTableSeat() {
       let seatList = document.getElementsByClassName("singleSeat");
-      // if(this.roundConfig.PersonList[0].initialX)
       for (let i = 0; i < seatList.length; i++) {
         let middleLeft =
           this.roundConfig.boxWidth / 2 - this.roundConfig.seatDiameter / 2;
@@ -146,29 +153,23 @@ export default {
           this.roundConfig.boxHeight / 2 - this.roundConfig.seatDiameter / 2;
         let rad =
           ((2 * Math.PI) / this.roundConfig.PersonList.length) * i -
-          Math.PI / 2; //角度
+          Math.PI / 2;
         let x =
           (this.roundConfig.tableDiameter / 2 +
             this.roundConfig.seatDiameter / 2 +
             this.roundConfig.tableDistance) *
           Math.cos(rad);
-        // console.log("x", x);
         let y =
           (this.roundConfig.tableDiameter / 2 +
             this.roundConfig.seatDiameter / 2 +
             this.roundConfig.tableDistance) *
           Math.sin(rad);
-        // console.log("y", y);
         seatList[i].style.left = middleLeft + x + "px";
-        // console.log("seatList[i].style.left", seatList[i].style.left);
         seatList[i].style.top = middleTop + y + "px";
-        // console.log("seatList[i].style.top", seatList[i].style.top);
-        //设置初始位置信息
         this.roundConfig.PersonList[i].initialX = x;
         this.roundConfig.PersonList[i].initialY = y;
       }
     },
-    //切换所有座位的位置
     changeSeatLocation() {
       let seatList = document.getElementsByClassName("singleSeat");
       for (let i = 0; i < seatList.length; i++) {
@@ -178,31 +179,22 @@ export default {
           ((2 * Math.PI) / this.roundConfig.PersonList.length) * i -
           Math.PI / 2; //角度
         let x = (230 - 35) * Math.cos(rad);
-        console.log("x", x);
         let y = (230 - 35) * Math.sin(rad);
-        console.log("y", y);
         seatList[i].style.left = middleLeft + x + "px";
-        console.log("seatList[i].style.left", seatList[i].style.left);
         seatList[i].style.top = middleTop + y + "px";
-        console.log("seatList[i].style.top", seatList[i].style.top);
-
-        //绑定点击、移动等事件
         let putDown = (event) => {
           seatList[i].style.cursor = "pointer";
-          let offsetX = parseInt(seatList[i].style.left); // 获取当前的x轴距离
-          let offsetY = parseInt(seatList[i].style.top); // 获取当前的y轴距离
-          let innerX = event.clientX - offsetX; // 获取鼠标在方块内的x轴距
-          let innerY = event.clientY - offsetY; // 获取鼠标在方块内的y轴距
+          let offsetX = parseInt(seatList[i].style.left);
+          let offsetY = parseInt(seatList[i].style.top);
+          let innerX = event.clientX - offsetX;
+          let innerY = event.clientY - offsetY;
 
-          // 鼠标移动的时候不停的修改div的left和top值
           document.onmousemove = (event) => {
             seatList[i].style.left = event.clientX - innerX + "px";
             seatList[i].style.top = event.clientY - innerY + "px";
-            //记录移动数据
             this.roundConfig.PersonList[i].currentX = event.clientX - innerX;
             this.roundConfig.PersonList[i].currentY = event.clientY - innerY;
 
-            // 边界判断
             if (parseInt(seatList[i].style.left) <= 0) {
               seatList[i].style.left = "0px";
             }
@@ -224,42 +216,31 @@ export default {
                 window.innerHeight - parseInt(seatList[i].style.height) + "px";
             }
           };
-          // 鼠标抬起时，清除绑定在文档上的mousemove和mouseup事件
-          // 否则鼠标抬起后还可以继续拖拽方块
           document.onmouseup = (event) => {
             document.onmousemove = null;
-            // 清除点border
+
             seatList[i].style.borderStyle = "";
             seatList[i].style.borderColor = "";
             seatList[i].style.borderWidth = "";
             document.onmouseup = null;
           };
         };
-        console.log("绑定方法了");
         seatList[i].addEventListener("mousedown", putDown, false);
-        //mouseenter添加hover样式
-        seatList[i].addEventListener("mouseenter", () => {
-        });
-        //mouseleave移除hover样式并重新渲染seatStyleBase初始样式
-        seatList[i].addEventListener("mouseleave", () => {
-          console.log("leave");
-        });
+        seatList[i].addEventListener("mouseenter", () => {});
+        seatList[i].addEventListener("mouseleave", () => {});
       }
     },
 
-    //设置桌子外方框(“画布”)尺寸
     setTableSize() {
       let ele = document.getElementsByClassName("com-seatAssign")[0];
       ele.style.width = this.roundConfig.boxWidth + "px";
       ele.style.height = this.roundConfig.boxHeight + "px";
-      //若未自定义圆桌，根据变量设置中间圆桌布尺寸
       if (!this.$scopedSlots.table) {
         let roundDesk = document.getElementsByClassName("roundTable")[0];
         roundDesk.style.width = this.roundConfig.tableDiameter + "px";
         roundDesk.style.height = this.roundConfig.tableDiameter + "px";
       }
 
-      //若未自定义座位,设置每个座位的样式(宽高)
       if (!this.$scopedSlots.seat) {
         let arr = document.getElementsByClassName("singleSeat");
         for (let i = 0; i < arr.length; i++) {
@@ -271,10 +252,18 @@ export default {
   },
   created() {},
   mounted() {
-    //页面渲染完后，获取所有座位，计算出位置，并渲染
-    this.setTableSize(); //设置桌布尺寸
-    this.resetRoundTableSeat(); //重置座位
-    this.changeSeatLocation(); //初始化拖拽事件
+    this.setTableSize();
+    let hasPos = this.roundConfig.PersonList.every((pos) => {
+      return (
+        pos.initialX && pos.initialY && pos.initialY != "" && pos.initialX != ""
+      );
+    });
+    if (hasPos) {
+      this.resetInterPos();
+    } else {
+      this.resetRoundTableSeat();
+    }
+    this.changeSeatLocation();
   },
 };
 </script>
