@@ -1,17 +1,69 @@
 {
-    "name": "seatassign",
-    "version": "1.0.5",
-    "main": "index.js",
-    "description": "提供了vue座位分布的功能，可根据桌形自动或手动生成排座",
-    "keywords": [
-      "排座",
-      "座位",
-      "拖拽",
-      "生成图片"
-    ],
-    "dependencies":{
-      "html2canvas": "^1.4.1"
+  "name": "seatassign",
+  "version": "1.1.1",
+  "main": "dist/seatassign.common.js",
+  "module": "dist/seatassign.umd.js",
+  "browser": "dist/seatassign.js",
+  "unpkg": "dist/seatassign.min.js",
+  "jsdelivr": "dist/seatassign.min.js",
+  "files": [
+    "dist"
+  ],
+  "description": "提供了vue2座位分布的功能，可根据桌形自动或手动生成排座",
+  "keywords": [
+    "排座",
+    "座位",
+    "拖拽",
+    "生成图片"
+  ],
+  "scripts": {
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build --target lib --name seatassign src/main.js",
+    "lint": "vue-cli-service lint",
+    "publish": "npm publish --access public"
+  },
+  "dependencies": {
+    "core-js": "^3.8.3",
+    "vue": "^2.6.14",
+    "html2canvas": "^1.4.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.16",
+    "@babel/eslint-parser": "^7.12.16",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-plugin-vue": "^8.0.3",
+    "vue-template-compiler": "^2.6.14",
+    "less": "^4.1.2",
+    "less-loader": "^8.0.0"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
     },
-    "license": "ISC"
-  }
-  
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "@babel/eslint-parser"
+    },
+    "rules": {}
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RookiestCoder/seatassign"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ],
+  "license": "ISC"
+}

@@ -12,6 +12,7 @@ npm install seatassign
 ```javascript
 import Vue from 'vue';
 import seatassign from 'seatassign';
+import 'seatassign/dist/seatassign.css';
 Vue.use(seatassign)
 ```
 

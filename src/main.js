@@ -1,4 +1,4 @@
-import seatAssign from "./src/seatAssign.vue"
+import seatAssign from "./components/seatAssign"
 
 
 const install = function (Vue) {
